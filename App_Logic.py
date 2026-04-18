@@ -80,16 +80,18 @@ st.markdown("""
         padding: 10px;
     }
 
-    /* টেবিলের ভেতরের টেক্সট কালার কালো নিশ্চিত করা */
-    [data-testid="stTable"] td, [data-testid="stTable"] th {
-        color: black !important;
-    }
+   /* এটি টেবিল এবং ইনপুট অংশকে সাদা করবে */
+[data-testid="stTable"], [data-testid="stDataFrame"], .stNumberInput, .stTextInput {
+    background-color: white !important;
+    padding: 10px;
+    border-radius: 10px;
+    color: black !important;
+}
 
-    /* ইনপুট বক্সের উজ্জ্বলতা বাড়ানো */
-    .stTextInput input, .stNumberInput input {
-        background-color: #f0f2f6 !important;
-        color: black !important;
-    }
+/* স্লাইডারের নামগুলো সাদা করার জন্য */
+label {
+    color: white !important;
+}
     </style>
    
     """, unsafe_allow_html=True)
