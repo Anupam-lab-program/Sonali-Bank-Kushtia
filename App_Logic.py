@@ -80,18 +80,28 @@ st.markdown("""
         padding: 10px;
     }
 
-   /* এটি টেবিল এবং ইনপুট অংশকে সাদা করবে */
-[data-testid="stTable"], [data-testid="stDataFrame"], .stNumberInput, .stTextInput {
+    /* টেবিলের ভেতরের টেক্সট কালার কালো নিশ্চিত করা */
+    [data-testid="stTable"] td, [data-testid="stTable"] th {
+        color: black !important;
+    }
+
+    /* ইনপুট বক্সের উজ্জ্বলতা বাড়ানো */
+    .stTextInput input, .stNumberInput input {
+        background-color: #f0f2f6 !important;
+        color: black !important;
+        /* টেবিল, ইনপুট এবং স্লাইডার এরিয়া সাদা করা */
+[data-testid="stTable"], [data-testid="stDataFrame"], .stSlider, .stNumberInput {
     background-color: white !important;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 20px !important;
+    border-radius: 12px !important;
     color: black !important;
 }
 
-/* স্লাইডারের নামগুলো সাদা করার জন্য */
-label {
-    color: white !important;
+/* স্লাইডারের টেক্সট কালার কালো করা */
+.stSlider label, .stNumberInput label {
+    color: black !important;
 }
+    }
     </style>
    
     """, unsafe_allow_html=True)
