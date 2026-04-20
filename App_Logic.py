@@ -1,6 +1,8 @@
+# আগের ৩ লাইনের বদলে নিচের ৩ লাইন বসান
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
-import pandas as pd
+
+conn = st.connection("gsheets", type=GSheetsConnection)
 from datetime import datetime
 from fpdf import FPDF
 import io
