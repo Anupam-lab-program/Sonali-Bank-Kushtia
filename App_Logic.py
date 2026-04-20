@@ -15,11 +15,11 @@ ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 
 # ডাটা রিড করার ফাংশন
 def load_data():
-    return conn.read(worksheet="Sheet1", ttl="0m")
+    return conn.read(worksheet="Sonali Bank Data", ttl="0m")
 
 # ডাটা সেভ করার ফাংশন
 def save_data(df):
-    conn.update(worksheet="Sheet1", data=df)
+    conn.update(worksheet="Sonali Bank Data", data=df)
 
 # --- ২. পিডিএফ তৈরির ফাংশন (আপনার আগের লজিক অনুযায়ী) ---
 def create_loan_pdf(name, mobile, loan_type, amount):
