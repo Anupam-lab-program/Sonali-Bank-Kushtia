@@ -3,3 +3,4 @@ pandas
 fpdf
 xlsxwriter
 st-gsheets-connection
+pandas
