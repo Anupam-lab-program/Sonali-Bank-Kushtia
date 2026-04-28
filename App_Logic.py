@@ -286,3 +286,28 @@ elif choice == "🔒 অ্যাডমিন প্যানেল":
             st.subheader("📜 লগইন রিপোর্ট (অপরিবর্তনীয়)")
             st.table(pd.read_sql_query("SELECT * FROM logs", conn))
     conn.close()
+import streamlit as st
+import pandas as pd
+from gspread_pandas import Spread
+
+# ১. টাইটেল দিন
+st.title("সোনালী ব্যাংক কুষ্টিয়া - রিয়েল টাইম ডাটা ড্যাশবোর্ড")
+
+# ২. কানেকশন সেটআপ (এটি স্ট্রীমলিট ক্লাউড থেকে ডাটা নেবে)
+def load_data():
+    # স্ট্রীমলিট সিক্রেটস থেকে গুগল শিট কানেক্ট করা
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    df = conn.read(spreadsheet="My Scraped Data")
+    return df
+
+# ৩. ডাটা টেবিল আকারে দেখানো
+try:
+    data = load_data()
+    st.subheader("গুগল শিট থেকে সংগৃহীত সর্বশেষ তথ্যসমূহ")
+    st.dataframe(data) # সুন্দর টেবিল আকারে দেখাবে
+    
+    # একটি ছোট গ্রাফ বা স্ট্যাটাস দেখানো
+    st.write(f"মোট ডাটা পাওয়া গেছে: {len(data)} টি")
+except Exception as e:
+    st.error("ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না। অনুগ্রহ করে সেটিংস চেক করুন।")
+
