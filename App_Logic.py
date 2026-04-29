@@ -317,3 +317,46 @@ try:
 except Exception as e:
     st.error("ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না। অনুগ্রহ করে সেটিংস চেক করুন।")
 
+# ১. প্রয়োজনীয় লাইব্রেরি ইম্পোর্ট (ফাইলের একদম উপরে না থাকলে এখানে দিন)
+from streamlit_gsheets import GSheetsConnection
+
+# ২. সাইডবারে একটি মেনু তৈরি করা
+# আপনার যদি আগে থেকেই সাইডবার মেনু থাকে, তবে এই logic টি সেখানে যোগ করুন
+st.sidebar.title("মেনু কন্ট্রোল")
+selection = st.sidebar.radio("পেজ নির্বাচন করুন:", ["মূল ওয়েবসাইট", "ডাটা ড্যাশবোর্ড"])
+
+# ৩. পেজ অনুযায়ী কন্টেন্ট দেখানো
+if selection == "ডাটা ড্যাশবোর্ড":
+    st.title("📊 সোনালী ব্যাংক কুষ্টিয়া - রিয়েল টাইম ডাটা ড্যাশবোর্ড")
+    st.markdown("---")
+    
+    # ডাটা লোড করার ফাংশন
+    def load_data():
+        try:
+            conn = st.connection("gsheets", type=GSheetsConnection)
+            # আপনার শিটের লিঙ্ক
+            df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1CsEpeI-_VQC0RdPwn7cnGKCQDDU4rE7j-cToqFWq9NM/")
+            return df
+        except Exception as e:
+            st.error(f"ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না: {e}")
+            return None
+
+    # ডাটা প্রদর্শন
+    with st.spinner('গুগল শিট থেকে ডাটা আনা হচ্ছে...'):
+        data = load_data()
+        if data is not None:
+            st.success("সর্বশেষ ডাটা লোড হয়েছে!")
+            # টেবিল আকারে ডাটা দেখানো
+            st.dataframe(data, use_container_width=True)
+            
+            # ডাটা ডাউনলোড করার অপশন (ঐচ্ছিক)
+            csv = data.to_csv(index=False).encode('utf-8')
+            st.download_button("Excel/CSV হিসেবে ডাউনলোড করুন", csv, "bank_data.csv", "text/csv")
+
+else:
+    # 'মূল ওয়েবসাইট' সিলেক্ট থাকলে আপনার আগের সব কোড এখানে থাকবে
+    st.title("সোনালী ব্যাংক কুষ্টিয়া শাখা")
+    st.write("স্বাগতম! আমাদের ডিজিটাল পোর্টালে আপনাকে স্বাগতম। বাম পাশের মেনু থেকে ডাটা ড্যাশবোর্ড দেখুন।")
+    # আপনার আগের মেইন পেজের ফাংশন বা কোডগুলো এখানে দিন
+
+
