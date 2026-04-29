@@ -7,121 +7,122 @@ from fpdf import FPDF
 from streamlit_gsheets import GSheetsConnection
 
 # --- ১. ডাটাবেস এবং পেজ কনফিগারেশন ---
-st.set_page_config(page_title="Sonali Bank Kushtia", layout="wide")
+st.set_page_config(page_title="Sonali Bank Kushtia", layout="wide") [cite: 55]
 
 def init_db():
-    conn = sqlite3.connect('sonali_kushtia_final.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS loans
+    conn = sqlite3.connect('sonali_kushtia_final.db') [cite: 10]
+    c = conn.cursor() [cite: 11]
+    c.execute('''CREATE TABLE IF NOT EXISTS loans 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT, name TEXT, 
-                  mobile TEXT, type TEXT, amount REAL, interest REAL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS users
+                  mobile TEXT, type TEXT, amount REAL, interest REAL)''') [cite: 12, 13, 14]
+    c.execute('''CREATE TABLE IF NOT EXISTS users 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, mobile TEXT, 
-                  password TEXT, status TEXT DEFAULT 'Pending')''')
-    c.execute('''CREATE TABLE IF NOT EXISTS logs
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, time TEXT)''')
-    conn.commit()
-    conn.close()
+                  password TEXT, status TEXT DEFAULT 'Pending')''') [cite: 15, 16, 17]
+    c.execute('''CREATE TABLE IF NOT EXISTS logs 
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, time TEXT)''') [cite: 18, 19]
+    conn.commit() [cite: 20]
+    conn.close() [cite: 21]
 
-init_db()
+init_db() [cite: 22]
 
 # --- ২. কাস্টম সিএসএস ---
 st.markdown("""
     <style>
-    .stApp { background-color: #2798F5; }
+    .stApp { background-color: #2798F5; } 
     .main-header { color: white !important; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
     label { color: white !important; font-weight: bold !important; }
     div.stButton > button { background-color: #1e8449 !important; color: white !important; border-radius: 12px; height: 3.5em; font-weight: bold; border: 1px solid white; }
     </style>
-    """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True) [cite: 56, 57, 58, 59, 63, 64]
 
 # --- ৩. সাইডবার মেনু কন্ট্রোল ---
 st.sidebar.title("💳 সোনালী ব্যাংক মেনু")
-selection = st.sidebar.radio("পেজ নির্বাচন করুন:", ["মূল ওয়েবসাইট", "📊 ডাটা ড্যাশবোর্ড", "🔒 অ্যাডমিন প্যানেল"])
+# ইউনিক কী যোগ করা হয়েছে যাতে ডুপ্লিকেট আইডি এরর না আসে
+selection = st.sidebar.radio("পেজ নির্বাচন করুন:", ["মূল ওয়েবসাইট", "📊 ডাটা ড্যাশবোর্ড", "🔒 অ্যাডমিন প্যানেল"], key="main_nav") [cite: 147]
 
 # --- ৪. ডাটা ড্যাশবোর্ড পেজ (গুগল শিট) ---
 if selection == "📊 ডাটা ড্যাশবোর্ড":
-    st.markdown("<h1 class='main-header'>📊 রিয়েল টাইম ডাটা ড্যাশবোর্ড</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='main-header'>📊 রিয়েল টাইম ডাটা ড্যাশবোর্ড</h1>", unsafe_allow_html=True) [cite: 150]
     
     def load_data():
         try:
-            conn_gs = st.connection("gsheets", type=GSheetsConnection)
-            # আপনার গুগল শিট লিঙ্কটি এখানে ব্যবহার করা হয়েছে
-            df = conn_gs.read(spreadsheet="https://docs.google.com/spreadsheets/d/1xU4ICiT3l_Xs9pIkt0b8pm-TIvHnXYVRnTwy7_vsnck/edit?gid=0#gid=0")
+            conn_gs = st.connection("gsheets", type=GSheetsConnection) [cite: 155]
+            df = conn_gs.read(spreadsheet="https://docs.google.com/spreadsheets/d/1CsEpeI-_VQC0RdPwn7cnGKCQDDU4rE7j-cToqFWq9NM/") [cite: 157]
             return df
         except Exception as e:
-            st.error(f"ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না: {e}")
+            st.error(f"ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না: {e}") [cite: 160]
             return None
 
-    with st.spinner('গুগল শিট থেকে ডাটা আনা হচ্ছে...'):
-        data = load_data()
+    with st.spinner('গুগল শিট থেকে ডাটা আনা হচ্ছে...'): [cite: 163]
+        data = load_data() [cite: 164]
         if data is not None:
-            st.success("সর্বশেষ ডাটা লোড হয়েছে!")
-            st.dataframe(data, use_container_width=True)
+            st.success("সর্বশেষ ডাটা লোড হয়েছে!") [cite: 166]
+            st.dataframe(data, use_container_width=True) [cite: 168]
             
-            # ডাউনলোড বাটন
-            csv = data.to_csv(index=False).encode('utf-8')
-            st.download_button("Excel/CSV হিসেবে ডাউনলোড করুন", csv, "bank_data.csv", "text/csv")
+            csv = data.to_csv(index=False).encode('utf-8') [cite: 170]
+            st.download_button("Excel/CSV হিসেবে ডাউনলোড করুন", csv, "bank_data.csv", "text/csv") [cite: 171]
 
 # --- ৫. অ্যাডমিন প্যানেল পেজ ---
 elif selection == "🔒 অ্যাডমিন প্যানেল":
-    st.markdown("<h1 class='main-header'>🔒 সিকিউরড অ্যাডমিন প্যানেল</h1>", unsafe_allow_html=True)
-    conn = sqlite3.connect('sonali_kushtia_final.db')
-    c = conn.cursor()
+    st.markdown("<h1 class='main-header'>🔒 সিকিউরড অ্যাডমিন প্যানেল</h1>", unsafe_allow_html=True) [cite: 68]
+    conn = sqlite3.connect('sonali_kushtia_final.db') [cite: 69]
+    c = conn.cursor() [cite: 70]
     
-    auth_mode = st.radio("অপশন নির্বাচন করুন:", ["লগইন", "নতুন কর্মকর্তা রেজিস্ট্রেশন", "ম্যানেজার কন্ট্রোল"])
+    auth_mode = st.radio("অপশন নির্বাচন করুন:", ["লগইন", "নতুন কর্মকর্তা রেজিস্ট্রেশন", "ম্যানেজার কন্ট্রোল"], key="admin_auth") [cite: 71]
     
     if auth_mode == "নতুন কর্মকর্তা রেজিস্ট্রেশন":
-        r_name = st.text_input("আপনার পূর্ণ নাম:")
-        r_mob = st.text_input("মোবাইল নম্বর:")
-        r_pw = st.text_input("পাসওয়ার্ড তৈরী করুন:", type="password")
-        if st.button("রেজিস্ট্রেশন আবেদন পাঠান"):
+        r_name = st.text_input("আপনার পূর্ণ নাম:", key="reg_name") [cite: 74]
+        r_mob = st.text_input("মোবাইল নম্বর:", key="reg_mobile") [cite: 75]
+        r_pw = st.text_input("পাসওয়ার্ড তৈরী করুন:", type="password", key="reg_pass") [cite: 76]
+        if st.button("রেজিস্ট্রেশন আবেদন পাঠান"): [cite: 77]
             if r_name and r_mob and r_pw:
-                c.execute("INSERT INTO users (name, mobile, password, status) VALUES (?,?,?,?)", (r_name, r_mob, r_pw, 'Pending'))
-                conn.commit()
-                st.info("আবেদন পাঠানো হয়েছে। ম্যানেজার অনুমোদন করলে লগইন করতে পারবেন।")
+                c.execute("INSERT INTO users (name, mobile, password, status) VALUES (?,?,?,?)", (r_name, r_mob, r_pw, 'Pending')) [cite: 79, 80]
+                conn.commit() [cite: 81]
+                st.info("আবেদন পাঠানো হয়েছে। ম্যানেজার অনুমোদন করলে লগইন করতে পারবেন।") [cite: 82]
     
     elif auth_mode == "লগইন":
-        l_mob = st.text_input("মোবাইল নম্বর:")
-        l_pw = st.text_input("পাসওয়ার্ড:", type="password")
-        if st.button("লগইন করুন"):
-            user = c.execute("SELECT * FROM users WHERE mobile=? AND password=? AND status='Approved'", (l_mob, l_pw)).fetchone()
+        l_mob = st.text_input("মোবাইল নম্বর:", key="login_mobile") [cite: 86]
+        l_pw = st.text_input("পাসওয়ার্ড:", type="password", key="login_pass") [cite: 87]
+        if st.button("লগইন করুন"): [cite: 88]
+            user = c.execute("SELECT * FROM users WHERE mobile=? AND password=? AND status='Approved'", (l_mob, l_pw)).fetchone() [cite: 89, 90]
             if user:
-                c.execute("INSERT INTO logs (user, time) VALUES (?,?)", (user[1], datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-                conn.commit()
-                st.session_state['logged'] = True
-                st.success(f"স্বাগতম {user[1]}!")
+                c.execute("INSERT INTO logs (user, time) VALUES (?,?)", (user[1], datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))) [cite: 92, 93]
+                conn.commit() [cite: 94]
+                st.session_state['logged'] = True [cite: 95]
+                st.success(f"স্বাগতম {user[1]}!") [cite: 96]
             else:
-                st.error("ভুল তথ্য অথবা আইডি অনুমোদিত নয়।")
+                st.error("ভুল তথ্য অথবা আইডি অনুমোদিত নয়।") [cite: 98]
         
-        if st.session_state.get('logged'):
-            df_loans = pd.read_sql_query("SELECT * FROM loans", conn)
-            st.subheader("📊 গ্রাহক লোন ডাটাবেস")
-            st.dataframe(df_loans, use_container_width=True)
+        if st.session_state.get('logged'): [cite: 99]
+            df_loans = pd.read_sql_query("SELECT * FROM loans", conn) [cite: 100]
+            st.subheader("📊 গ্রাহক লোন ডাটাবেস") [cite: 101]
+            st.dataframe(df_loans, use_container_width=True) [cite: 102]
 
     elif auth_mode == "ম্যানেজার কন্ট্রোল":
-        if st.text_input("ম্যানেজার সিক্রেট কোড:", type="password") == "sonali123":
-            st.subheader("পেন্ডিং ইউজার লিস্ট")
-            df_pending = pd.read_sql_query("SELECT id, name, mobile, status FROM users WHERE status='Pending'", conn)
-            st.table(df_pending)
-            u_id = st.number_input("কাকে অনুমোদন দিবেন? (আইডি লিখুন):", min_value=1, step=1)
-            if st.button("অনুমোদন দিন"):
-                c.execute("UPDATE users SET status='Approved' WHERE id=?", (u_id,))
-                conn.commit()
-                st.success("অনুমোদিত হয়েছে!")
-                st.rerun()
-            st.subheader("📜 লগইন রিপোর্ট")
-            st.table(pd.read_sql_query("SELECT * FROM logs", conn))
-    conn.close()
+        if st.text_input("ম্যানেজার সিক্রেট কোড:", type="password", key="mgr_code") == "sonali123": [cite: 104]
+            st.subheader("পেন্ডিং ইউজার লিস্ট") [cite: 105]
+            df_pending = pd.read_sql_query("SELECT id, name, mobile, status FROM users WHERE status='Pending'", conn) [cite: 106]
+            st.table(df_pending) [cite: 107]
+            u_id = st.number_input("কাকে অনুমোদন দিবেন? (আইডি লিখুন):", min_value=1, step=1, key="approve_id") [cite: 108]
+            if st.button("অনুমোদন দিন"): [cite: 109]
+                c.execute("UPDATE users SET status='Approved' WHERE id=?", (u_id,)) [cite: 110]
+                conn.commit() [cite: 111]
+                st.success("অনুমোদিত হয়েছে!") [cite: 112]
+                st.rerun() [cite: 113]
+            st.subheader("📜 লগইন রিপোর্ট") [cite: 114]
+            st.table(pd.read_sql_query("SELECT * FROM logs", conn)) [cite: 115]
+    conn.close() [cite: 116]
 
 # --- ৬. মূল ওয়েবসাইট পেজ ---
 else:
-    st.markdown("<h1 class='main-header'>সোনালী ব্যাংক কুষ্টিয়া শাখা</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='main-header'>সোনালী ব্যাংক কুষ্টিয়া শাখা</h1>", unsafe_allow_html=True) [cite: 174]
     st.markdown("<h3 style='text-align:center; color:white;'>ডিজিটাল ব্যাংকিং পোর্টালে আপনাকে স্বাগতম</h3>", unsafe_allow_html=True)
     
-    # এখানে আপনার মূল ওয়েবসাইটের ক্যালকুলেটর বা অন্যান্য কোডগুলো থাকবে
-    st.info("বাম পাশের মেনু থেকে বিভিন্ন সেবা গ্রহণ করুন।")
-
+    # লোনের ইনপুট বক্সেও ইউনিক কী যোগ করা হলো
+    u_name = st.text_input("গ্রাহকের নাম (ইংরেজিতে):", key="main_cust_name")
+    u_mobile = st.text_input("মোবাইল নম্বর:", key="main_cust_mobile")
+    
+    st.info("বাম পাশের মেনু থেকে বিভিন্ন সেবা গ্রহণ করুন।") [cite: 175]
 
 import streamlit as st
 import pandas as pd
