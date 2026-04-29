@@ -302,8 +302,8 @@ def load_data():
     return df
 
 # এই লাইনটি আবার একদম বাম থেকে শুরু হবে
-data = load_data()
-st.dataframe(data)
+    data = load_data()
+    st.dataframe(data)
     return df
 
 # ৩. ডাটা টেবিল আকারে দেখানো
