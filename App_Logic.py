@@ -4,7 +4,7 @@ import datetime
 import sqlite3
 import io
 from fpdf import FPDF
-
+from streamlit_gsheets import GSheetsConnection
 
 # --- ১. ডাটাবেস ফাংশনসমূহ ---
 def init_db():
@@ -296,8 +296,13 @@ st.title("সোনালী ব্যাংক কুষ্টিয়া - র�
 # ২. কানেকশন সেটআপ (এটি স্ট্রীমলিট ক্লাউড থেকে ডাটা নেবে)
 def load_data():
     # স্ট্রীমলিট সিক্রেটস থেকে গুগল শিট কানেক্ট করা
-    conn = st.connection("gsheets", type=GSheetsConnection)
-    df = conn.read(spreadsheet="My Scraped Data")
+   # মেইন ফাইলের কোডটি এভাবে লিখুন
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+# লিঙ্ক থেকে gid অংশটুকু বাদ দিন
+df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1CsEpeI-_VQC0RdPwn7cnGKCQDDU4rE7j-cToqFWq9NM/")
+st.dataframe(df)
+ 
     return df
 
 # ৩. ডাটা টেবিল আকারে দেখানো
