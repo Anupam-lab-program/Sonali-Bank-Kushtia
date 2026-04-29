@@ -294,15 +294,16 @@ from gspread_pandas import Spread
 st.title("সোনালী ব্যাংক কুষ্টিয়া - রিয়েল টাইম ডাটা ড্যাশবোর্ড")
 
 # ২. কানেকশন সেটআপ (এটি স্ট্রীমলিট ক্লাউড থেকে ডাটা নেবে)
+# ২৯৭ নম্বর লাইন
 def load_data():
-    # স্ট্রীমলিট সিক্রেটস থেকে গুগল শিট কানেক্ট করা
-   # মেইন ফাইলের কোডটি এভাবে লিখুন
-conn = st.connection("gsheets", type=GSheetsConnection)
+    # এই লাইনগুলো অবশ্যই ডানে সরে থাকবে (৪টি স্পেস দিন)
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1CsEpeI-_VQC0RdPwn7cnGKCQDDU4rE7j-cToqFWq9NM/")
+    return df
 
-# লিঙ্ক থেকে gid অংশটুকু বাদ দিন
-df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1CsEpeI-_VQC0RdPwn7cnGKCQDDU4rE7j-cToqFWq9NM/")
-st.dataframe(df)
- 
+# এই লাইনটি আবার একদম বাম থেকে শুরু হবে
+data = load_data()
+st.dataframe(data)
     return df
 
 # ৩. ডাটা টেবিল আকারে দেখানো
