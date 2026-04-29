@@ -47,7 +47,7 @@ if selection == "📊 ডাটা ড্যাশবোর্ড":
     def load_data():
         try:
             conn_gs = st.connection("gsheets", type=GSheetsConnection) [cite: 155]
-            df = conn_gs.read(spreadsheet="https://docs.google.com/spreadsheets/d/1CsEpeI-_VQC0RdPwn7cnGKCQDDU4rE7j-cToqFWq9NM/") [cite: 157]
+            df = conn_gs.read(spreadsheet="https://docs.google.com/spreadsheets/d/1xU4ICiT3l_Xs9pIkt0b8pm-TIvHnXYVRnTwy7_vsnck/edit?gid=0#gid=0") [cite: 157]
             return df
         except Exception as e:
             st.error(f"ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না: {e}") [cite: 160]
