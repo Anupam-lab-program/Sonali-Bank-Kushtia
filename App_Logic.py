@@ -56,6 +56,8 @@ if selection == "🏠 মূল ওয়েবসাইট":
             loan_type = st.selectbox("লোনের ধরণ নির্বাচন করুন:", 
                                    ["পার্সোনাল লোন", "গৃহ নির্মাণ লোন", "এসএমই লোন", "কৃষি লোন"])
             loan_amount = st.number_input("কাঙ্ক্ষিত লোনের পরিমাণ (টাকা):", min_value=10000, step=5000)
+            u_photo = st.file_uploader("📸 ছবি আপলোড করুন", type=['jpg', 'png', 'jpeg'])
+            u_nid = st.file_uploader("💳 এনআইডি কপি আপলোড করুন", type=['jpg', 'png', 'pdf'])
             
             if st.button("আবেদন জমা দিন"):
                 if u_name and len(u_mobile) == 11:
@@ -76,6 +78,13 @@ if selection == "🏠 মূল ওয়েবসাইট":
             st.markdown("</div>", unsafe_allow_html=True)
             
         st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown(f'<div class="success-card">✅ আবেদন সফল! মোট মুনাফা: {interest:,.2f} টাকা।</div>',
+                        unsafe_allow_html=True)
+            pdf_bytes = create_loan_pdf(u_name, u_mobile, u_type, u_amount, interest)
+            st.download_button("📥 লোন ফরম (PDF) ডাউনলোড", pdf_bytes, f"{u_name}_loan.pdf")
+        else:
+            st.warning("সব তথ্য এবং ছবি/এনআইডি আপলোড করুন।")
+
 
 # --- ৫. ডাটা ড্যাশবোর্ড ---
 elif selection == "📊 ডাটা ড্যাশবোর্ড":
@@ -138,40 +147,6 @@ def create_emi_pdf(p, r, n, emi, df):
 # --- ৩. সাইডবার ---
 choice = st.sidebar.radio("পেজ নির্বাচন করুন:",
                           ["💰 লোন আবেদন", "🧮 মাসিক সঞ্চয় স্কীম", "📜 সঞ্চয়পত্র প্রকল্প", "🔒 অ্যাডমিন প্যানেল"])
-
-# --- ৪. পেজ ১: লোন আবেদন (ছবি ও এনআইডিসহ) ---
-if choice == "💰 লোন আবেদন":
-    st.markdown("<h1 class='main-header'>🏦 লোন আবেদন ও ডকুমেন্ট সংযোজন</h1>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        u_name = st.text_input("গ্রাহকের নাম (ইংরেজিতে):")
-        u_mobile = st.text_input("মোবাইল নম্বর:")
-        u_salary = st.number_input("মাসিক বেতন (টাকা):", min_value=0)
-        u_photo = st.file_uploader("📸 ছবি আপলোড করুন", type=['jpg', 'png', 'jpeg'])
-    with col2:
-        u_amount = st.number_input("লোনের পরিমাণ (টাকা):", min_value=0)
-        u_type = st.selectbox("লোনের ধরন:", ["Home Loan", "Personal Loan", "OD Loan"])
-        u_nid = st.file_uploader("💳 এনআইডি কপি আপলোড করুন", type=['jpg', 'png', 'pdf'])
-
-    if st.button("হিসাব এবং আবেদন জমা দিন"):
-        if u_name and u_photo and u_nid and u_amount > 0:
-            rate = 8.5 if "Home" in u_type else (11.0 if "Personal" in u_type else 9.5)
-            interest = (u_amount * rate) / 100
-
-            conn = sqlite3.connect('sonali_kushtia_final.db')
-            c = conn.cursor()
-            c.execute("INSERT INTO loans (time, name, mobile, type, amount, interest) VALUES (?,?,?,?,?,?)",
-                      (datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), u_name, u_mobile, u_type, u_amount,
-                       interest))
-            conn.commit();
-            conn.close()
-
-            st.markdown(f'<div class="success-card">✅ আবেদন সফল! মোট মুনাফা: {interest:,.2f} টাকা।</div>',
-                        unsafe_allow_html=True)
-            pdf_bytes = create_loan_pdf(u_name, u_mobile, u_type, u_amount, interest)
-            st.download_button("📥 লোন ফরম (PDF) ডাউনলোড", pdf_bytes, f"{u_name}_loan.pdf")
-        else:
-            st.warning("সব তথ্য এবং ছবি/এনআইডি আপলোড করুন।")
 
 
 # --- ৫. পেজ ২: মাসিক সঞ্চয় স্কীম (নাম ও মুনাফা আপডেট) ---
