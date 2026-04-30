@@ -130,7 +130,7 @@ elif selection == "📊 ডাটা ড্যাশবোর্ড":
         st.success("গুগল শিট থেকে সর্বশেষ তথ্য লোড হয়েছে")
         st.dataframe(data, use_container_width=True)
     else:
-        st.error("ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না।")https://docs.google.com/spreadsheets/d/1xU4ICiT3l_Xs9pIkt0b8pm-TIvHnXYVRnTwy7_vsnck/edit?gid=0#gid=0
+        st.error("ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না।")
 
 # --- ৫. পেজ ২: মাসিক সঞ্চয় স্কীম (নাম ও মুনাফা আপডেট) ---
 
