@@ -245,7 +245,7 @@ elif choice == "🔒 অ্যাডমিন প্যানেল":
         st.subheader("লাইভ গুগল শিট ডাটা")
         try:
             conn_gs = st.connection("gsheets", type=GSheetsConnection)
-            df_gs = conn_gs.read(spreadsheet="https://docs.google.com/spreadsheets/d/1CsEpeI-_VQC0RdPwn7cnGKCQDDU4rE7j-cToqFWq9NM/")
+            df_gs = conn_gs.read(spreadsheet="https://docs.google.com/spreadsheets/d/1xU4ICiT3l_Xs9pIkt0b8pm-TIvHnXYVRnTwy7_vsnck/edit?gid=0#gid=0")
             st.dataframe(df_gs, use_container_width=True)
         except:
             st.error("গুগল শিট কানেক্ট করা যাচ্ছে না। দয়া করে আপনার 'Secrets' চেক করুন।")
