@@ -3,6 +3,8 @@ import pandas as pd
 import sqlite3
 import re
 from streamlit_gsheets import GSheetsConnection
+import io
+from fpdf import FPDF
 
 # --- ১. কনফিগারেশন ও ডাটাবেস ---
 st.set_page_config(page_title="Sonali Bank Kushtia", layout="wide")
@@ -114,23 +116,27 @@ if selection == "🏠 মূল ওয়েবসাইট":
 elif selection == "📊 ডাটা ড্যাশবোর্ড":
     st.markdown("<h1 class='main-header'>📊 ডাটা অ্যানালাইসিস ড্যাশবোর্ড</h1>", unsafe_allow_html=True)
     st.info("গুগল শিট থেকে ডাটা এখানে প্রদর্শিত হবে।")
+    
+    def load_data():
+        try:
+            conn_gs = st.connection("gsheets", type=GSheetsConnection)
+            df = conn_gs.read(spreadsheet="https://docs.google.com/spreadsheets/d/1CsEpeI-_VQC0RdPwn7cnGKCQDDU4rE7j-cToqFWq9NM/")
+            return df
+        except:
+            return None
 
-# --- ৭. অ্যাডমিন প্যানেল পেজ ---
-elif selection == "🔒 অ্যাডমিন প্যানেল":
-    st.markdown("<h1 class='main-header'>🔒 অ্যাডমিন লগইন</h1>", unsafe_allow_html=True)
-    st.text_input("ইউজারনেম:")
-    st.text_input("পাসওয়ার্ড:", type="password")
-    st.button("লগইন")
-# --- ৩. সাইডবার ---
-choice = st.sidebar.radio("পেজ নির্বাচন করুন:",
-                          ["💰 লোন আবেদন", "🧮 মাসিক সঞ্চয় স্কীম", "📜 সঞ্চয়পত্র প্রকল্প", "🔒 অ্যাডমিন প্যানেল"])
-
+    data = load_data()
+    if data is not None:
+        st.success("গুগল শিট থেকে সর্বশেষ তথ্য লোড হয়েছে")
+        st.dataframe(data, use_container_width=True)
+    else:
+        st.error("ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না।")https://docs.google.com/spreadsheets/d/1xU4ICiT3l_Xs9pIkt0b8pm-TIvHnXYVRnTwy7_vsnck/edit?gid=0#gid=0
 
 # --- ৫. পেজ ২: মাসিক সঞ্চয় স্কীম (নাম ও মুনাফা আপডেট) ---
 
 elif choice == "🧮 মাসিক সঞ্চয় স্কীম":  # আপনার মেনু অনুযায়ী নাম
-        st.markdown("<h1 class='main-header'>🧮 ব্যাংকিং ক্যালকুলেটর ও রিপোর্ট</h1>", unsafe_allow_html=True)
-        tab1, tab2 = st.tabs(["📊 EMI ক্যালকুলেটর", "💰 সঞ্চয় ও বোনাস"])
+    st.markdown("<h1 class='main-header'>🧮 ব্যাংকিং ক্যালকুলেটর ও রিপোর্ট</h1>", unsafe_allow_html=True)
+    tab1, tab2 = st.tabs(["📊 EMI ক্যালকুলেটর", "💰 সঞ্চয় ও বোনাস"])
 
     with tab1:
         p = st.number_input("মূল টাকা:", value=100000, key="emi_p")
@@ -267,4 +273,3 @@ elif choice == "🔒 অ্যাডমিন প্যানেল":
             st.subheader("📜 লগইন রিপোর্ট (অপরিবর্তনীয়)")
             st.table(pd.read_sql_query("SELECT * FROM logs", conn))
     conn.close()
-
