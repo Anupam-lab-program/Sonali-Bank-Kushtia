@@ -2,9 +2,10 @@ import streamlit as st
 import pandas as pd
 import datetime
 import sqlite3
+import re
+from streamlit_gsheets import GSheetsConnection
 import io
 from fpdf import FPDF
-from streamlit_gsheets import GSheetsConnection
 
 # --- ১. ডাটাবেস এবং পেজ কনফিগারেশন ---
 st.set_page_config(page_title="Sonali Bank Kushtia", layout="wide")
@@ -25,23 +26,55 @@ def init_db():
 
 init_db()
 
-# --- ২. কাস্টম সিএসএস ---
+# --- ২. ব্যাংক ব্র্যান্ডিং সিএসএস (সোনালী ব্যাংক থিম) ---
 st.markdown("""
     <style>
-    .stApp { background-color: #2798F5; } 
-    .main-header { color: white !important; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-    label { color: white !important; font-weight: bold !important; }
-    div.stButton > button { background-color: #1e8449 !important; color: white !important; border-radius: 12px; height: 3.5em; font-weight: bold; border: 1px solid white; }
+    /* মেইন ব্যাকগ্রাউন্ড */
+    .stApp { background-color: #f4f7f6; } 
+    
+    /* হেডার সেকশন - সোনালী ব্যাংকের লোগো কালার অনুকরণে */
+    .main-header { 
+        background-color: #FFD700; /* সোনালী/গোল্ডেন */
+        color: #1e8449 !important; /* ডিপ গ্রিন */
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        border-bottom: 5px solid #1e8449;
+        margin-bottom: 25px;
+    }
+    
+    /* লেবেল এবং টেক্সট */
+    label { color: #1e8449 !important; font-weight: bold !important; font-size: 1.1em; }
+    
+    /* বাটন স্টাইল */
+    div.stButton > button { 
+        background-color: #1e8449 !important; 
+        color: white !important; 
+        border-radius: 8px; 
+        width: 100%;
+        transition: 0.3s;
+    }
+    div.stButton > button:hover { background-color: #145a32 !important; border: 1px solid #FFD700; }
+    
+    /* সাইডবার */
+    [data-testid="stSidebar"] { background-color: #ffffff; border-right: 2px solid #FFD700; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- ৩. সাইডবার মেনু কন্ট্রোল ---
-st.sidebar.title("💳 সোনালী ব্যাংক মেনু")
-selection = st.sidebar.radio("পেজ নির্বাচন করুন:", ["মূল ওয়েবসাইট", "📊 ডাটা ড্যাশবোর্ড", "🔒 অ্যাডমিন প্যানেল"], key="nav_menu")
+# --- ৩. ভ্যালিডেশন ফাংশনসমূহ ---
+def validate_mobile(mobile):
+    # ১১ ডিজিটের নম্বর কি না এবং শুরুটা ০১৭, ০১৮, ০১৯, ০১৫, ০১৬, ০১৩ কি না যাচাই
+    pattern = r"^(01[3-9][0-9]{8})$"
+    return re.match(pattern, mobile)
 
-# --- ৪. ডাটা ড্যাশবোর্ড পেজ (গুগল শিট) ---
+# --- ৪. সাইডবার মেনু ---
+st.sidebar.image("https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Sonali_Bank_Logo.svg/220px-Sonali_Bank_Logo.svg.png", width=100)
+st.sidebar.title("সোনালী ব্যাংক মেনু")
+selection = st.sidebar.radio("পেজ নির্বাচন করুন:", ["মূল ওয়েবসাইট", "📊 ডাটা ড্যাশবোর্ড", "🔒 অ্যাডমিন প্যানেল"], key="nav_main")
+
+# --- ৫. ডাটা ড্যাশবোর্ড ---
 if selection == "📊 ডাটা ড্যাশবোর্ড":
-    st.markdown("<h1 class='main-header'>📊 রিয়েল টাইম ডাটা ড্যাশবোর্ড</h1>", unsafe_allow_html=True)
+    st.markdown("<div class='main-header'><h1>📊 রিয়েল টাইম ডাটা ড্যাশবোর্ড</h1></div>", unsafe_allow_html=True)
     
     def load_data():
         try:
@@ -49,102 +82,50 @@ if selection == "📊 ডাটা ড্যাশবোর্ড":
             df = conn_gs.read(spreadsheet="https://docs.google.com/spreadsheets/d/1xU4ICiT3l_Xs9pIkt0b8pm-TIvHnXYVRnTwy7_vsnck/edit?gid=0#gid=0")
             return df
         except Exception as e:
-            st.error(f"ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না।")
+            st.error("গুগল শিটের সাথে কানেক্ট করা যাচ্ছে না।")
             return None
 
-    with st.spinner('গুগল শিট থেকে ডাটা আনা হচ্ছে...'):
-        data = load_data()
-        if data is not None:
-            st.success("সর্বশেষ ডাটা লোড হয়েছে!")
-            st.dataframe(data, use_container_width=True)
-            
-            csv = data.to_csv(index=False).encode('utf-8')
-            st.download_button("Excel/CSV হিসেবে ডাউনলোড করুন", csv, "bank_data.csv", "text/csv", key="dl_btn")
+    data = load_data()
+    if data is not None:
+        st.dataframe(data, use_container_width=True)
 
-# --- ৫. অ্যাডমিন প্যানেল পেজ ---
+# --- ৬. অ্যাডমিন প্যানেল ---
 elif selection == "🔒 অ্যাডমিন প্যানেল":
-    st.markdown("<h1 class='main-header'>🔒 সিকিউরড অ্যাডমিন প্যানেল</h1>", unsafe_allow_html=True)
-    conn = sqlite3.connect('sonali_kushtia_final.db')
-    c = conn.cursor()
+    st.markdown("<div class='main-header'><h1>🔒 অ্যাডমিন সিকিউরিটি</h1></div>", unsafe_allow_html=True)
+    auth_mode = st.radio("অপশন:", ["লগইন", "রেজিস্ট্রেশন"], key="admin_auth")
     
-    auth_mode = st.radio("অপশন নির্বাচন করুন:", ["লগইন", "নতুন কর্মকর্তা রেজিস্ট্রেশন", "ম্যানেজার কন্ট্রোল"], key="admin_mode")
-    
-    if auth_mode == "নতুন কর্মকর্তা রেজিস্ট্রেশন":
-        r_name = st.text_input("আপনার পূর্ণ নাম:", key="reg_name")
+    if auth_mode == "রেজিস্ট্রেশন":
         r_mob = st.text_input("মোবাইল নম্বর:", key="reg_mob")
-        r_pw = st.text_input("পাসওয়ার্ড তৈরী করুন:", type="password", key="reg_pw")
-        if st.button("রেজিস্ট্রেশন আবেদন পাঠান", key="reg_btn"):
-            if r_name and r_mob and r_pw:
-                c.execute("INSERT INTO users (name, mobile, password, status) VALUES (?,?,?,?)", (r_name, r_mob, r_pw, 'Pending'))
-                conn.commit()
-                st.info("আবেদন পাঠানো হয়েছে।")
-    
-    elif auth_mode == "লগইন":
-        l_mob = st.text_input("মোবাইল নম্বর:", key="log_mob")
-        l_pw = st.text_input("পাসওয়ার্ড:", type="password", key="log_pw")
-        if st.button("লগইন করুন", key="log_btn"):
-            user = c.execute("SELECT * FROM users WHERE mobile=? AND password=? AND status='Approved'", (l_mob, l_pw)).fetchone()
-            if user:
-                c.execute("INSERT INTO logs (user, time) VALUES (?,?)", (user[1], datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-                conn.commit()
-                st.session_state['logged'] = True
-                st.success(f"স্বাগতম {user[1]}!")
-            else:
-                st.error("তথ্য ভুল অথবা আইডি অনুমোদিত নয়।")
-        
-        if st.session_state.get('logged'):
-            df_loans = pd.read_sql_query("SELECT * FROM loans", conn)
-            st.subheader("📊 গ্রাহক লোন ডাটাবেস")
-            st.dataframe(df_loans, use_container_width=True)
+        if r_mob and not validate_mobile(r_mob):
+            st.error("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)")
+        # ... বাকি রেজিস্ট্রেশন কোড ...
 
-    elif auth_mode == "ম্যানেজার কন্ট্রোল":
-        if st.text_input("ম্যানেজার সিক্রেট কোড:", type="password", key="mgr_pw") == "sonali123":
-            st.subheader("পেন্ডিং ইউজার লিস্ট")
-            df_pending = pd.read_sql_query("SELECT id, name, mobile, status FROM users WHERE status='Pending'", conn)
-            st.table(df_pending)
-            u_id = st.number_input("আইডি লিখুন:", min_value=1, step=1, key="app_id")
-            if st.button("অনুমোদন দিন", key="app_btn"):
-                c.execute("UPDATE users SET status='Approved' WHERE id=?", (u_id,))
-                conn.commit()
-                st.success("অনুমোদিত!")
-                st.rerun()
-            st.table(pd.read_sql_query("SELECT * FROM logs", conn))
-    conn.close()
-
-# --- ৬. মূল ওয়েবসাইট পেজ ---
+# --- ৭. মূল ওয়েবসাইট (লোন ও ক্যালকুলেটর) ---
 else:
-    st.markdown("<h1 class='main-header'>সোনালী ব্যাংক কুষ্টিয়া শাখা</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align:center; color:white;'>ডিজিটাল ব্যাংকিং পোর্টালে আপনাকে স্বাগতম</h3>", unsafe_allow_html=True)
+    st.markdown("<div class='main-header'><h1>সোনালী ব্যাংক কুষ্টিয়া শাখা</h1></div>", unsafe_allow_html=True)
     
-    u_name = st.text_input("গ্রাহকের নাম (ইংরেজিতে):", key="home_name")
-    u_mobile = st.text_input("মোবাইল নম্বর:", key="home_mob")
-    st.info("বাম পাশের মেনু থেকে ডাটা ড্যাশবোর্ড বা অ্যাডমিন প্যানেলে যান।")
+    col1, col2 = st.columns(2)
+    with col1:
+        u_name = st.text_input("গ্রাহকের নাম (ইংরেজিতে):", key="h_name")
+        u_mobile = st.text_input("মোবাইল নম্বর (১১ ডিজিট):", key="h_mob")
+        
+        # মোবাইল নম্বর ভ্যালিডেশন মেসেজ
+        if u_mobile:
+            if validate_mobile(u_mobile):
+                st.success("মোবাইল নম্বরটি সঠিক।")
+            else:
+                st.warning("অনুগ্রহ করে একটি সঠিক বাংলাদেশী মোবাইল নম্বর দিন।")
 
-import streamlit as st
-import pandas as pd
-import datetime
-import sqlite3
-import io
-from fpdf import FPDF
+    with col2:
+        loan_amount = st.number_input("লোনের পরিমাণ (টাকা):", min_value=10000, max_value=50000000, step=5000, key="h_amount")
+        st.caption("সর্বনিম্ন ১০,০০০ এবং সর্বোচ্চ ৫ কোটি টাকা।")
 
-
-# --- ১. ডাটাবেস ফাংশনসমূহ ---
-def init_db():
-    conn = sqlite3.connect('sonali_kushtia_final.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS loans 
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT, name TEXT, 
-                  mobile TEXT, type TEXT, amount REAL, interest REAL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS users 
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, mobile TEXT, 
-                  password TEXT, status TEXT DEFAULT 'Pending')''')
-    c.execute('''CREATE TABLE IF NOT EXISTS logs 
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, time TEXT)''')
-    conn.commit()
-    conn.close()
-
-
-init_db()
+    if st.button("আবেদন জমা দিন"):
+        if u_name and validate_mobile(u_mobile) and loan_amount >= 10000:
+            st.balloons()
+            st.success(f"ধন্যবাদ {u_name}! আপনার {loan_amount:,.2f} টাকার আবেদনের প্রাথমিক তথ্য গ্রহণ করা হয়েছে।")
+        else:
+            st.error("দয়া করে নাম, সঠিক মোবাইল নম্বর এবং টাকার পরিমাণ পুনরায় চেক করুন।")
 
 
 def clean_text(text):
@@ -181,52 +162,6 @@ def create_emi_pdf(p, r, n, emi, df):
         pdf.cell(50, 8, f"{row['Principal']:,.2f}", 1)
         pdf.cell(50, 8, f"{row['Balance']:,.2f}", 1, 1)
     return pdf.output(dest='S').encode('latin-1', 'ignore')
-
-
-# --- ২. কাস্টম সিএসএস ---
-st.set_page_config(page_title="Sonali Bank Kushtia", layout="wide")
-st.markdown("""
-    <style>
-    .stApp { background-color: #2798F5; }
-    .main-header { color: white !important; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-    .card { background-color: white; padding: 20px; border-radius: 15px; border-left: 5px solid #1e8449; margin-bottom: 20px; color: black; }
-    .sc-result { background-color: #FFD700; padding: 20px; border-radius: 15px; border: 2px solid white; color: black; text-align: center; }
-    .success-card { background-color: #ffffff; padding: 15px; border-radius: 10px; border-left: 8px solid #28a745; color: black; font-weight: bold; margin-bottom: 15px; }
-    label { color: white !important; font-weight: bold !important; }
-    div.stButton > button { background-color: #1e8449 !important; color: white !important; border-radius: 12px; height: 3.5em; font-weight: bold; border: 1px solid white; }
-    /* অ্যাডমিন প্যানেলের টেবিল এবং ডাটাফ্রেমের ব্যাকগ্রাউন্ড উজ্জ্বল করা */
-    [data-testid="stTable"], [data-testid="stDataFrame"], .stTable {
-        background-color: white !important;
-        color: black !important;
-        border-radius: 10px;
-        padding: 10px;
-    }
-
-    /* টেবিলের ভেতরের টেক্সট কালার কালো নিশ্চিত করা */
-    [data-testid="stTable"] td, [data-testid="stTable"] th {
-        color: black !important;
-    }
-
-    /* ইনপুট বক্সের উজ্জ্বলতা বাড়ানো */
-    .stTextInput input, .stNumberInput input {
-        background-color: #f0f2f6 !important;
-        color: black !important;
-        /* টেবিল, ইনপুট এবং স্লাইডার এরিয়া সাদা করা */
-[data-testid="stTable"], [data-testid="stDataFrame"], .stSlider, .stNumberInput {
-    background-color: white !important;
-    padding: 20px !important;
-    border-radius: 12px !important;
-    color: black !important;
-}
-
-/* স্লাইডারের টেক্সট কালার কালো করা */
-.stSlider label, .stNumberInput label {
-    color: black !important;
-}
-    }
-    </style>
-   
-    """, unsafe_allow_html=True)
 
 # --- ৩. সাইডবার ---
 choice = st.sidebar.radio("পেজ নির্বাচন করুন:",
