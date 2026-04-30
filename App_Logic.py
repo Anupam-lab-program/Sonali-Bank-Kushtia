@@ -70,13 +70,16 @@ st.markdown("""
     .info-box { background-color: #FFD700; padding: 15px; border-radius: 10px; color: black; font-weight: bold; }
     label { color: white !important; font-weight: bold !important; font-size: 1.1em; }
     
-    /* ইনপুট বক্সের উজ্জ্বলতা ও বর্ডার বাড়ানো */
-    .stTextInput input, .stNumberInput input, .stSelectbox div {
-        background-color: white !important;
-        color: black !important;
-        border: 2px solid #FFD700 !important;
-        border-radius: 8px !important;
-    }
+    /* সিলেক্ট বক্স এবং ইনপুট বক্সের টেক্সট ছোট করা */
+div[data-baseweb="select"] > div {
+    font-size: 0.9em !important; /* এখানে মান কমিয়ে ফন্ট ছোট করতে পারবেন */
+    padding: 2px !important;
+}
+
+.stTextInput input, .stNumberInput input {
+    font-size: 0.9em !important;
+    height: 40px !important; /* বক্সের উচ্চতা সামঞ্জস্য করার জন্য */
+}
     
     div.stButton > button { background-color: #1e8449 !important; color: white !important; border-radius: 12px; height: 3.5em; font-weight: bold; border: 1px solid white; width: 100%; }
     
