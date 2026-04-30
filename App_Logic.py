@@ -136,22 +136,23 @@ if choice == "💰 লোন আবেদন":
         })
         st.table(rates)
 
-# --- ৬. পেজ ২: মাসিক সঞ্চয় স্কীম ---
-elif choice == "🧮 মাসিক সঞ্চয় স্কীম":
+# --- ৫. পেজ ২: মাসিক সঞ্চয় স্কীম (নাম ও মুনাফা আপডেট) ---
+
+elif choice == "🧮 মাসিক সঞ্চয় স্কীম":  # আপনার মেনু অনুযায়ী নাম
     st.markdown("<h1 class='main-header'>🧮 ব্যাংকিং ক্যালকুলেটর ও রিপোর্ট</h1>", unsafe_allow_html=True)
-    tab1, tab2 = st.tabs(["📊 EMI ক্যালকুলেটর", "💰 সঞ্চয় ও বোনাস"])
+    tab1, tab2 = st.tabs(["📊 EMI ক্যালকুলেটর", "💰 সঞ্চয় ও বোনাস"])
 
     with tab1:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
         p = st.number_input("মূল টাকা:", value=100000, key="emi_p")
         r = st.number_input("মুনাফার হার (%):", value=9.0, key="emi_r")
-        n = st.number_input("মেয়াদ (মাস):", value=12, key="emi_n")
+        n = st.number_input("মেয়াদ (মাস):", value=12, key="emi_n")
 
-        if st.button("EMI রিপোর্ট তৈরি করুন"):
+        if st.button("EMI ও ব্রেকআপ রিপোর্ট তৈরি করুন"):
             m_rate = r / (12 * 100)
             emi = (p * m_rate * (1 + m_rate) ** n) / ((1 + m_rate) ** n - 1)
-            st.info(f"মাসিক কিস্তি: {emi:,.2f} টাকা")
+            st.markdown(f'<div class="card"><h3>মাসিক কিস্তি: {emi:,.2f} টাকা</h3></div>', unsafe_allow_html=True)
 
+            # ব্রেকআপ টেবিল তৈরি
             balance = p
             rows = []
             for i in range(1, n + 1):
@@ -162,30 +163,66 @@ elif choice == "🧮 মাসিক সঞ্চয় স্কীম":
 
             df_emi = pd.DataFrame(rows, columns=['Month', 'Interest', 'Principal', 'Balance'])
             st.dataframe(df_emi, use_container_width=True)
-            pdf_emi = create_emi_pdf(p, r, n, emi, df_emi)
-            st.download_button("📥 ডাউনলোড রিপোর্ট (PDF)", pdf_emi, "EMI_Report.pdf")
-        st.markdown("</div>", unsafe_allow_html=True)
+
+            # পিডিএফ জেনারেটর কল (নিশ্চিত করুন আপনার create_emi_pdf ফাংশনটি কোডের উপরে ডিফাইন করা আছে)
+            try:
+                pdf_emi = create_emi_pdf(p, r, n, emi, df_emi)
+                st.download_button("📥 ইএমআই ব্রেকআপ রিপোর্ট (PDF)", pdf_emi, "EMI_Breakup.pdf")
+            except NameError:
+                st.error(
+                    "পিডিএফ ফাংশনটি খুঁজে পাওয়া যায়নি। দয়া করে নিশ্চিত করুন create_emi_pdf ফাংশনটি আপনার কোডে আছে।")
 
     with tab2:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        amount = st.number_input("জমার পরিমাণ (মাসিক):", value=1000)
-        years = st.slider("মেয়াদ (বছর):", 1, 10, 5)
-        is_bonus = st.checkbox("আমি কোনো কিস্তি ডিফল্টার হইনি (বোনাস পাবেন)")
-        
-        if st.button("সঞ্চয় হিসাব করুন"):
-            total = amount * years * 12
-            bonus = (amount + 1000) if is_bonus else 0
-            st.success(f"মেয়াদ শেষে সর্বমোট পাবেন (বোনাসসহ): {total + bonus:,.2f} টাকা")
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.subheader("মাসিক সঞ্চয় ও লয়্যালটি বোনাস হিসাব")
+        amount = st.number_input("জমার পরিমাণ (মাসিক):", value=1000, key="save_amt")
+        years = st.slider("মেয়াদ (বছর):", 1, 10, 5, key="save_yrs")
+        rate_s = st.number_input("মুনাফার হার (%):", value=7.5, key="save_rate")
+        is_bonus = st.checkbox("আমি কোনো কিস্তি ডিফল্টার হইনি (বোনাস পাবেন)", key="save_bonus")
 
-# --- ৭. পেজ ৩: সঞ্চয়পত্র প্রকল্প ---
-elif choice == "📜 সঞ্চয়পত্র প্রকল্প":
-    st.markdown("<h1 class='main-header'>📜 সঞ্চয়পত্র প্রকল্প</h1>", unsafe_allow_html=True)
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    invest = st.number_input("বিনিয়োগের পরিমাণ:", value=100000)
-    if st.button("মুনাফা দেখুন"):
-        st.write(f"আপনার মাসিক নিট মুনাফা আনুমানিক ১,০০০ টাকা (ট্যাক্স বাদে)।")
-    st.markdown("</div>", unsafe_allow_html=True)
+        if st.button("সঞ্চয় ও মুনাফা হিসাব করুন"):
+            total_months = years * 12
+            principal = amount * total_months
+            # ব্যাংকিং সূত্র অনুযায়ী চক্রবৃদ্ধি মুনাফা হিসাব
+            profit = amount * (((1 + (rate_s / 100 / 12)) ** total_months - 1) / (rate_s / 100 / 12)) - principal
+
+            # আপনার সেই বিশেষ বোনাস লজিক
+            bonus = (amount + 1000) if is_bonus else 0
+
+            st.markdown(f"""
+                <div class="card">
+                    <h3 style="color: #1e8449; text-align: center;">💰 সঞ্চয়ের ফলাফল</h3>
+                    <hr>
+                    <p style="font-size: 18px;">মেয়াদ শেষে আপনার <b>মূল জমা: {principal:,.2f}</b> টাকা</p>
+                    <p style="font-size: 18px;">অর্জিত <b>মুনাফা: {profit:,.2f}</b> টাকা</p>
+                    <p style="font-size: 18px;"><b>বোনাস: {bonus:,.2f}</b> টাকা সহ</p>
+                    <h2 style="color: #28a745; text-align: center;">সর্বমোট পাবেন: {principal + profit + bonus:,.2f} টাকা</h2>
+                </div>
+            """, unsafe_allow_html=True)
+
+
+# --- ৬. পেজ ৩: সঞ্চয়পত্র প্রকল্প (লিংকসহ) ---
+elif choice == "📜 সঞ্চয়পত্র প্রকল্প":
+    st.markdown("<h1 class='main-header'>📜 সঞ্চয়পত্র প্রকল্প</h1>", unsafe_allow_html=True)
+    st.markdown("""
+        <div class="card" style="text-align: center;">
+            <p>সঞ্চয়পত্রের সর্বশেষ নিয়ম ও ফরম ডাউনলোডের জন্য ভিজিট করুন:</p>
+            <a href="http://nationalsavings.gov.bd/" target="_blank">
+                <button style="background-color: #1e8449; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold;">
+                    অফিসিয়াল ওয়েবসাইটে যান ↗️
+                </button>
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
+    sc_type = st.selectbox("সঞ্চয়পত্রের ধরণ:",
+                           ["৩-মাস অন্তর মুনাফা", "পরিবার সঞ্চয়পত্র", "পেনশনার সঞ্চয়পত্র", "বাংলাদেশ সঞ্চয়পত্র"])
+    invest = st.number_input("বিনিয়োগের পরিমাণ (টাকা):", min_value=10000, step=10000, value=100000)
+    if st.button("মুনাফা হিসাব করুন"):
+        rate = 11.04 if "৩-মাস" in sc_type else 11.52
+        monthly = (invest * (rate / 100)) / 12
+        st.markdown(
+            f'<div class="sc-result"><h2>মাসিক নিট মুনাফা: {monthly:,.2f} টাকা</h2><p>বার্ষিক হার: {rate}%</p></div>',
+            unsafe_allow_html=True)
+
 
 # --- ৮. পেজ ৪: অ্যাডমিন প্যানেল ---
 elif choice == "🔒 অ্যাডমিন প্যানেল":
