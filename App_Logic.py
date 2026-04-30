@@ -100,16 +100,6 @@ if selection == "📊 ডাটা ড্যাশবোর্ড":
         st.error("ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না।")
 
 
-# --- ৬. অ্যাডমিন প্যানেল ---
-else:
-    st.markdown("<h1 class='main-header'>🔒 অ্যাডমিন প্যানেল</h1>", unsafe_allow_html=True)
-    # আপনার আগের অ্যাডমিন প্যানেলের কোড এখানে থাকবে...
-elif selection == "🔒 অ্যাডমিন প্যানেল":
-    st.markdown("<h1 class='main-header'>🔒 সিকিউরড অ্যাডমিন প্যানেল</h1>", unsafe_allow_html=True)
-    # আপনার আগের অ্যাডমিন প্যানেলের লজিক এখানে থাকবে...
-    st.info("অ্যাডমিন প্যানেল সেকশনটি আপনার আগের কোড অনুযায়ী কাজ করছে।")
-
-
 def clean_text(text):
     return str(text).encode('ascii', 'ignore').decode('ascii')
 
