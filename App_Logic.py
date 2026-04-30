@@ -135,7 +135,7 @@ if choice == "💰 লোন আবেদন":
         st.markdown("<div class='info-box'>📈 বর্তমান সুদের হার</div>", unsafe_allow_html=True)
         rates = pd.DataFrame({
             "লোন": ["Home", "Personal", "OD"],
-            "হার": ["৮.৫০%", "১১.০০%", "৯.৫০%"]
+            "হার": ["9.50%", "12.00%", "11.00%"]
         })
         st.table(rates)
 
