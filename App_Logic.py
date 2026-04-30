@@ -77,14 +77,6 @@ if selection == "🏠 মূল ওয়েবসাইট":
             st.caption("*সুদের হার সময়ভেদে পরিবর্তনযোগ্য।")
             st.markdown("</div>", unsafe_allow_html=True)
             
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown(f'<div class="success-card">✅ আবেদন সফল! মোট মুনাফা: {interest:,.2f} টাকা।</div>',
-                        unsafe_allow_html=True)
-            pdf_bytes = create_loan_pdf(u_name, u_mobile, u_type, u_amount, interest)
-            st.download_button("📥 লোন ফরম (PDF) ডাউনলোড", pdf_bytes, f"{u_name}_loan.pdf")
-        else:
-            st.warning("সব তথ্য এবং ছবি/এনআইডি আপলোড করুন।")
-
 
 # --- ৫. ডাটা ড্যাশবোর্ড ---
 elif selection == "📊 ডাটা ড্যাশবোর্ড":
